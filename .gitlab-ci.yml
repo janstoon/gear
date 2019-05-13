@@ -1,0 +1,17 @@
+stages:
+  - test
+
+test:linux:
+  stage: test
+  image: golang:latest
+  variables:
+    GIT_URL: gitlab.com
+    GOPATH: /go
+    PROJECT_DIR: $GOPATH/src/$GIT_URL/$CI_PROJECT_NAMESPACE
+  script:
+    - mkdir -p $PROJECT_DIR
+    - cp -r $CI_PROJECT_DIR $PROJECT_DIR/$CI_PROJECT_NAME
+    - cd $PROJECT_DIR/$CI_PROJECT_NAME
+    - git config --global url."https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.com/".insteadOf "https://$GIT_URL/"
+    - go get -v -t ./...
+    - go test -cover ./...
