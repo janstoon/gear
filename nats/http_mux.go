@@ -96,6 +96,7 @@ func (rw *httpResponse) Write(data []byte) (int, error) {
 		rw.WriteHeader(http.StatusOK)
 	}
 
+	return 0, nil
 }
 
 func (rw *httpResponse) WriteHeader(statusCode int) {
