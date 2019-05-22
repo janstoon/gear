@@ -1,6 +1,9 @@
 package actor
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+)
 
 type HttpMux interface {
 	Handle(pattern string, handler http.Handler)
@@ -8,6 +11,14 @@ type HttpMux interface {
 
 type mmux struct {
 	muxes []HttpMux
+}
+
+type HttpGateway interface {
+	HttpMux
+
+	ListenAndServe() error
+	ListenAndServeTLS() error
+	Shutdown(ctx context.Context) error
 }
 
 func CombineHttpMuxes(muxes ...HttpMux) HttpMux {
