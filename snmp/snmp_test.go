@@ -17,6 +17,8 @@ func TestGetSNMP(t *testing.T) {
 	}
 	a, err := snmpTest.GetSNMP()
 	if a == nil {
-		t.Errorf("Something is wrong amd return value is %v with error: %v", a, err)
+		if err == nil {
+			t.Errorf("Something is wrong amd return value is %v with error: %v", a, err)
+		}
 	}
 }
