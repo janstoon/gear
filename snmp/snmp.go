@@ -3,51 +3,45 @@ package snmp
 import (
 	"fmt"
 	"github.com/k-sone/snmpgo"
-	"net"
 )
 
-type snmpAgent struct {
-	username  string
-	password  string
-	community string
-	ip        net.IPAddr
-	version   snmpgo.SNMPVersion
-	oids      []string
+type SnmpAgent struct {
+	Username  string
+	Password  string
+	Community string
+	Ip        string
+	Version   snmpgo.SNMPVersion
+	Oids      []string
 }
 
-func (sa snmpAgent) getSNMP() (string, error) {
+func (sa SnmpAgent) GetSNMP() (snmpgo.Variable, error) {
 
 	//Creating SNMP Object :
 	snmp, err := snmpgo.NewSNMP(snmpgo.SNMPArguments{
-		Version:   sa.version,     //SNMP Version eg. v1 or v3
-		Address:   sa.ip.String(), //Device Address
+		Version:   sa.Version, //SNMP Version eg. v1 or v3
+		Address:   sa.Ip,      //Device Address
 		Retries:   1,
-		Community: sa.community, //Community string that defines in the device menu. For v3 maybe contains user and password.
+		Community: sa.Community, //Community string that defines in the device menu. For v3 maybe contains user and password.
 	})
 
 	if err != nil {
 		// Failed to create snmpgo.SNMP object
-		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
 
 	//Oids :
-	oids, err := snmpgo.NewOids([]string{})
+	//oids, err := snmpgo.NewOids([]string{})
 
-	/* Config Oids :
+	/* Config Oids : */
 	oids, err := snmpgo.NewOids([]string{
-		"1.3.6.1.2.1.1.1.0",
-		"1.3.6.1.2.1.1.2.0",
-		"1.3.6.1.2.1.1.3.0",
+		sa.Oids[0],
+		sa.Oids[1],
 	})
-
-	*/
 
 	//Open Connection:
 	if err = snmp.Open(); err != nil {
 		// Failed to open connection
-		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
 	defer snmp.Close()
 
@@ -55,19 +49,16 @@ func (sa snmpAgent) getSNMP() (string, error) {
 	pdu, err := snmp.GetRequest(oids)
 	if err != nil {
 		// Failed to request
-		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
 	if pdu.ErrorStatus() != snmpgo.NoError {
 		// Received an error from the agent
 		fmt.Println(pdu.ErrorStatus(), pdu.ErrorIndex())
 	}
 
-	// get VarBind list
-	fmt.Println(pdu.VarBinds())
+	// get VarBind list : pdu.VarBinds())
 
-	// select a VarBind
-	fmt.Println(pdu.VarBinds().MatchOid(oids[0]))
+	// select a VarBind : pdu.VarBinds().MatchOid(oids[0])
 
-	return pdu.VarBinds().String(), nil
+	return pdu.VarBinds().MatchOid(oids[1]).Variable, err
 }
