@@ -17,7 +17,3 @@ func (m mockConn) Set(id string, value string) error {
 
 	return nil
 }
-
-func (m mockConn) Close(id string) error {
-	return nil
-}

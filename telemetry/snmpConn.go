@@ -3,6 +3,7 @@ package telemetry
 import (
 	"fmt"
 	"github.com/k-sone/snmpgo"
+	"gitlab.com/janstun/actor"
 )
 
 //Struct needed for creating the first snmp objects
@@ -14,7 +15,7 @@ type snmpConn struct {
 	version   snmpgo.SNMPVersion
 }
 
-func DialSNMP(username, password, community, ip string,version snmpgo.SNMPVersion) TeleConnection {
+func DialSNMP(username, password, community, ip string, version snmpgo.SNMPVersion) actor.Telemetry {
 	snmpConn := new(snmpConn)
 	snmpConn.username = username
 	snmpConn.password = password
@@ -42,7 +43,7 @@ func (s snmpConn) Get(id string) (string, error) {
 	}
 	defer snmp.Close()
 
-  idoid := []string{id}
+	idoid := []string{id}
 	oids, err := snmpgo.NewOids(idoid)
 
 	//GetData :
@@ -94,7 +95,7 @@ func (s snmpConn) GetMany(id []string) (map[string]string, error) {
 	pdu.VarBinds().MatchOid(oids[0]).Variable.String()
 	resmap := make(map[string]string)
 
-	for i , k := range id {
+	for i, k := range id {
 		resmap[k] = pdu.VarBinds().MatchOid(oids[i]).Variable.String()
 		i++
 	}
@@ -103,9 +104,5 @@ func (s snmpConn) GetMany(id []string) (map[string]string, error) {
 }
 
 func (s snmpConn) Set(id string, value string) error {
-	return nil
-}
-
-func (s snmpConn) Close(id string) error {
 	return nil
 }
