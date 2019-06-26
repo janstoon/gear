@@ -3,7 +3,6 @@ package telemetry
 import (
 	"fmt"
 	"github.com/k-sone/snmpgo"
-	"gitlab.com/janstun/actor"
 )
 
 //Struct needed for creating the first snmp objects
@@ -12,10 +11,10 @@ type snmpConn struct {
 	password  string
 	community string
 	ip        string
-	version   snmpgo.SNMPVersion
+	version   int
 }
 
-func DialSNMP(username, password, community, ip string, version snmpgo.SNMPVersion) actor.Telemetry {
+func DialSNMP(username, password, community, ip string, version int) Connection {
 	snmpConn := new(snmpConn)
 	snmpConn.username = username
 	snmpConn.password = password
@@ -27,8 +26,8 @@ func DialSNMP(username, password, community, ip string, version snmpgo.SNMPVersi
 
 func (s snmpConn) Get(id string) (string, error) {
 	snmp, err := snmpgo.NewSNMP(snmpgo.SNMPArguments{
-		Version:   s.version, //SNMP Version eg. v1 or v3
-		Address:   s.ip,      //Device Address
+		Version:   snmpgo.SNMPVersion(s.version), //SNMP Version eg. v1 or v3
+		Address:   s.ip,                          //Device Address
 		Retries:   1,
 		Community: s.community, //Community string that defines in the device menu. For v3 maybe contains user and password.
 	})
@@ -64,8 +63,8 @@ func (s snmpConn) Get(id string) (string, error) {
 
 func (s snmpConn) GetMany(id []string) (map[string]string, error) {
 	snmp, err := snmpgo.NewSNMP(snmpgo.SNMPArguments{
-		Version:   s.version, //SNMP Version eg. v1 or v3
-		Address:   s.ip,      //Device Address
+		Version:   snmpgo.SNMPVersion(s.version), //SNMP Version eg. v1 or v3
+		Address:   s.ip,                          //Device Address
 		Retries:   1,
 		Community: s.community, //Community string that defines in the device menu. For v3 maybe contains user and password.
 	})
