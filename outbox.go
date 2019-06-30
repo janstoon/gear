@@ -1,4 +1,4 @@
-package actor
+package gear
 
 type EmailOutbox interface {
 	SendEmail(interface{}) error

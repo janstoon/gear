@@ -3,14 +3,14 @@ package mongo
 import (
 	"gopkg.in/mgo.v2"
 
-	"gitlab.com/janstun/actor"
+	"gitlab.com/janstun/gear"
 )
 
 type documentor struct {
 	sess *mgo.Session
 }
 
-func NewDocumentor(dsn string) (actor.Documentor, error) {
+func NewDocumentor(dsn string) (gear.Documentor, error) {
 	if s, err := mgo.Dial(dsn); err != nil {
 		return nil, err
 	} else {
@@ -18,7 +18,7 @@ func NewDocumentor(dsn string) (actor.Documentor, error) {
 	}
 }
 
-func (s documentor) DB(name string) actor.DocDatabase {
+func (s documentor) DB(name string) gear.DocDatabase {
 	return database{s.sess.DB(name)}
 }
 
@@ -32,11 +32,11 @@ type database struct {
 	db *mgo.Database
 }
 
-func (d database) Aggregate(name string) actor.DocAggregate {
+func (d database) Aggregate(name string) gear.DocAggregate {
 	return collection{d.db.C(name)}
 }
 
-func (d database) FileStorage(prefix string) actor.DocFileStorage {
+func (d database) FileStorage(prefix string) gear.DocFileStorage {
 	return gridfs{d.db.GridFS(prefix)}
 }
 
@@ -74,11 +74,11 @@ func (c collection) Count() (n int, err error) {
 	return c.coll.Count()
 }
 
-func (c collection) Find(query interface{}) actor.DocQuery {
+func (c collection) Find(query interface{}) gear.DocQuery {
 	return documentQuery{c.coll.Find(query)}
 }
 
-func (c collection) FindId(id interface{}) actor.DocQuery {
+func (c collection) FindId(id interface{}) gear.DocQuery {
 	return documentQuery{c.coll.FindId(id)}
 }
 
@@ -130,19 +130,19 @@ type gridfs struct {
 	fs *mgo.GridFS
 }
 
-func (g gridfs) Create(name string) (actor.DocFile, error) {
+func (g gridfs) Create(name string) (gear.DocFile, error) {
 	return g.fs.Create(name)
 }
 
-func (g gridfs) Open(name string) (actor.DocFile, error) {
+func (g gridfs) Open(name string) (gear.DocFile, error) {
 	return g.fs.Open(name)
 }
 
-func (g gridfs) OpenId(id interface{}) (actor.DocFile, error) {
+func (g gridfs) OpenId(id interface{}) (gear.DocFile, error) {
 	return g.fs.OpenId(id)
 }
 
-func (g gridfs) Find(query interface{}) actor.DocQuery {
+func (g gridfs) Find(query interface{}) gear.DocQuery {
 	return documentQuery{g.fs.Find(query)}
 }
 
@@ -174,7 +174,7 @@ func (q documentQuery) Update(update interface{}, result interface{}) (int, erro
 	return changed.Updated, err
 }
 
-func (q documentQuery) Batch(n int) actor.DocQuery {
+func (q documentQuery) Batch(n int) gear.DocQuery {
 	q.query.Batch(n)
 
 	return q
@@ -188,31 +188,31 @@ func (q documentQuery) One(result interface{}) error {
 	return q.query.One(result)
 }
 
-func (q documentQuery) Limit(n int) actor.DocQuery {
+func (q documentQuery) Limit(n int) gear.DocQuery {
 	q.query.Limit(n)
 
 	return q
 }
 
-func (q documentQuery) Skip(n int) actor.DocQuery {
+func (q documentQuery) Skip(n int) gear.DocQuery {
 	q.query.Skip(n)
 
 	return q
 }
 
-func (q documentQuery) Prefetch(p float64) actor.DocQuery {
+func (q documentQuery) Prefetch(p float64) gear.DocQuery {
 	q.query.Prefetch(p)
 
 	return q
 }
 
-func (q documentQuery) Select(selector interface{}) actor.DocQuery {
+func (q documentQuery) Select(selector interface{}) gear.DocQuery {
 	q.query.Select(selector)
 
 	return q
 }
 
-func (q documentQuery) Sort(fields ...string) actor.DocQuery {
+func (q documentQuery) Sort(fields ...string) geary.DocQuery {
 	q.query.Sort(fields...)
 
 	return q

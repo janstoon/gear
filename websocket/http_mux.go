@@ -3,7 +3,7 @@ package websocket
 import (
 	"net/http"
 
-	"gitlab.com/janstun/actor"
+	"gitlab.com/janstun/gear"
 	"golang.org/x/net/websocket"
 )
 
@@ -27,6 +27,6 @@ func (s mux) createHttpHandler(handler http.Handler) websocket.Handler {
 	})
 }
 
-func NewHttpMux(addr string) (actor.HttpMux, error) {
+func NewHttpMux(addr string) (gear.HttpMux, error) {
 	return mux{addr}, nil
 }

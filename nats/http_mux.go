@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/nats-io/go-nats"
-	"gitlab.com/janstun/actor"
+	"gitlab.com/janstun/gear"
 )
 
 type Gateway interface {
-	actor.HttpMux
+	gear.HttpMux
 
 	Unhandle(pattern string)
 }

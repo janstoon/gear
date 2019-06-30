@@ -3,43 +3,43 @@ package logrus
 import (
 	"github.com/sirupsen/logrus"
 
-	"gitlab.com/janstun/actor"
+	"gitlab.com/janstun/gear"
 )
 
 type levelled struct {
 	logger *logrus.Logger
 }
 
-var lvlMap = map[actor.LogLevel]logrus.Level{
-	actor.FATAL: logrus.FatalLevel,
-	actor.ERROR: logrus.ErrorLevel,
-	actor.WARN:  logrus.WarnLevel,
-	actor.INFO:  logrus.InfoLevel,
-	actor.DEBUG: logrus.DebugLevel,
+var lvlMap = map[gear.LogLevel]logrus.Level{
+	gear.FATAL: logrus.FatalLevel,
+	gear.ERROR: logrus.ErrorLevel,
+	gear.WARN:  logrus.WarnLevel,
+	gear.INFO:  logrus.InfoLevel,
+	gear.DEBUG: logrus.DebugLevel,
 }
 
-func NewLevelledLogger(lvl actor.LogLevel) (actor.LevelledLogger, error) {
+func NewLevelledLogger(lvl gear.LogLevel) (gear.LevelledLogger, error) {
 	logger := logrus.New()
 	logger.Level = lvlMap[lvl]
 
 	return levelled{logger}, nil
 }
 
-func (s levelled) Log(level actor.LogLevel, format string, v ...interface{}) {
+func (s levelled) Log(level gear.LogLevel, format string, v ...interface{}) {
 	switch level {
-	case actor.FATAL:
+	case gear.FATAL:
 		s.logger.Fatalf(format, v...)
 
-	case actor.ERROR:
+	case gear.ERROR:
 		s.logger.Errorf(format, v...)
 
-	case actor.WARN:
+	case gear.WARN:
 		s.logger.Warnf(format, v...)
 
-	case actor.INFO:
+	case gear.INFO:
 		s.logger.Infof(format, v...)
 
-	case actor.DEBUG:
+	case gear.DEBUG:
 		s.logger.Debugf(format, v...)
 
 	default:

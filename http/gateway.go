@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"gitlab.com/janstun/actor"
+	"gitlab.com/janstun/gear"
 )
 
 type gateway struct {
@@ -29,7 +29,7 @@ func (gw gateway) Shutdown(ctx context.Context) error {
 	return gw.server.Shutdown(ctx)
 }
 
-func NewGateway(addr string, tlsConfig *tls.Config) actor.HttpGateway {
+func NewGateway(addr string, tlsConfig *tls.Config) gear.HttpGateway {
 	gw := &gateway{}
 	gw.mux = http.NewServeMux()
 	gw.server = &http.Server{

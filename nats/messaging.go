@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/nats-io/go-nats"
-	"gitlab.com/janstun/actor"
+	"gitlab.com/janstun/gear"
 )
 
 type broker struct {
@@ -21,7 +21,7 @@ type broker struct {
 	chunsubs chan string
 }
 
-func (s broker) Publish(msg actor.Message) error {
+func (s broker) Publish(msg gear.Message) error {
 	return s.conn.PublishMsg(&nats.Msg{
 		Subject: msg.Topic,
 		Reply:   msg.Reply,
@@ -29,7 +29,7 @@ func (s broker) Publish(msg actor.Message) error {
 	})
 }
 
-func (s *broker) Subscribe(topic string) (<-chan actor.Message, error) {
+func (s *broker) Subscribe(topic string) (<-chan gear.Message, error) {
 	if nil == s.chsubs {
 		s.chsubs = make(chan *nats.Subscription)
 		s.subs = make(map[string]*nats.Subscription)
@@ -53,11 +53,11 @@ func (s *broker) Subscribe(topic string) (<-chan actor.Message, error) {
 		s.chsubs <- v
 	}
 
-	ch := make(chan actor.Message)
+	ch := make(chan gear.Message)
 	go func() {
 		for {
 			msg := <-chmsg
-			ch <- actor.Message{
+			ch <- gear.Message{
 				Topic: msg.Subject,
 				Reply: msg.Reply,
 				Data:  msg.Data,
@@ -88,7 +88,7 @@ func (s broker) Request(topic string, data []byte, timeout time.Duration) ([]byt
 	}
 }
 
-func NewAsyncBroker(url string) (actor.AsyncBroker, error) {
+func NewAsyncBroker(url string) (gear.AsyncBroker, error) {
 	if conn, err := nats.Connect(url); err != nil {
 		return nil, err
 	} else {
@@ -96,7 +96,7 @@ func NewAsyncBroker(url string) (actor.AsyncBroker, error) {
 	}
 }
 
-func NewSyncBroker(url string) (actor.SyncBroker, error) {
+func NewSyncBroker(url string) (gear.SyncBroker, error) {
 	if conn, err := nats.Connect(url); err != nil {
 		return nil, err
 	} else {

@@ -1,4 +1,4 @@
-package actor
+package gear
 
 type BasicAuthentication interface {
 	BasicAuthenticate(username, password string) error

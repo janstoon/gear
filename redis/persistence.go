@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/garyburd/redigo/redis"
-	"gitlab.com/janstun/actor"
+	"gitlab.com/janstun/gear"
 )
 
 // Redis
@@ -75,7 +75,7 @@ func (s cache) Delete(key string) error {
 	return nil
 }
 
-func NewDictionary(dsn string) (actor.Dictionary, error) {
+func NewDictionary(dsn string) (gear.Dictionary, error) {
 	pool := &redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,

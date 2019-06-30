@@ -1,4 +1,4 @@
-package actor
+package gear
 
 import "time"
 

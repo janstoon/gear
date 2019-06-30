@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/janstoon/ldap"
-	"gitlab.com/janstun/actor"
+	"gitlab.com/janstun/gear"
 )
 
 type basic struct {
@@ -18,7 +18,7 @@ func (s basic) BasicAuthenticate(username, password string) error {
 	return err
 }
 
-func NewBasicAuthentication(network, addr, baseDn string) (actor.BasicAuthentication, error) {
+func NewBasicAuthentication(network, addr, baseDn string) (gear.BasicAuthentication, error) {
 	if conn, err := ldap.Dial(network, addr); err != nil {
 		return nil, err
 	} else {
