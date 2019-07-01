@@ -57,6 +57,7 @@ func (s cache) Get(key string) interface{} {
 	} else {
 		return v
 	}
+
 }
 
 func (s cache) GetDefault(key string, value interface{}) interface{} {
