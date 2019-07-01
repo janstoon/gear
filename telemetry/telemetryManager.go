@@ -7,8 +7,8 @@ type TelemetryMessage struct {
 }
 
 type TelemetrySubscriber interface {
-	Subscribe(topic string) (<-chan Message, error)
-	Unsubscribe(topic string) error
+	TeleSubscribe(topic string) (<-chan TelemetryMessage, error)
+	TeleUnsubscribe(topic string) error
 }
 
 type device struct{
