@@ -3,9 +3,15 @@ package gear
 import "time"
 
 type Message struct {
+	// Message subject which indicates the queue the message have to enqueue in
 	Topic string
+
+	// In case message have to be answered the receiver may use
+	// `Reply` as topic to publish the answer
 	Reply string
-	Data  []byte
+
+	// Message payload
+	Data []byte
 }
 
 type Subscriber interface {
