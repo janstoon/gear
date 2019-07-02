@@ -14,6 +14,7 @@ type snmpConn struct {
 	version   int
 }
 
+//Creating the SNMP Connection Object
 func DialSNMP(username, password, community, ip string, version int) Connection {
 	snmpConn := new(snmpConn)
 	snmpConn.username = username
@@ -24,6 +25,7 @@ func DialSNMP(username, password, community, ip string, version int) Connection 
 	return snmpConn
 }
 
+//Get SNMP Data for a single OID and returns a Result
 func (s snmpConn) Get(id string) (string, error) {
 	snmp, err := snmpgo.NewSNMP(snmpgo.SNMPArguments{
 		Version:   snmpgo.SNMPVersion(s.version), //SNMP Version eg. v1 or v3
@@ -44,7 +46,10 @@ func (s snmpConn) Get(id string) (string, error) {
 
 	idoid := []string{id}
 	oids, err := snmpgo.NewOids(idoid)
-
+	if err != nil {
+		// Failed to request
+		return "", err
+	}
 	//GetData :
 	pdu, err := snmp.GetRequest(oids)
 
@@ -61,7 +66,8 @@ func (s snmpConn) Get(id string) (string, error) {
 	return pdu.VarBinds().MatchOid(oids[0]).Variable.String(), err
 }
 
-func (s snmpConn) GetMany(id []string) (map[string]string, error) {
+//Get SNMP Data for mutiple OIDs and returns a Map[OID][Result]
+func (s snmpConn) GetMany(ids []string) (map[string]string, error) {
 	snmp, err := snmpgo.NewSNMP(snmpgo.SNMPArguments{
 		Version:   snmpgo.SNMPVersion(s.version), //SNMP Version eg. v1 or v3
 		Address:   s.ip,                          //Device Address
@@ -79,7 +85,7 @@ func (s snmpConn) GetMany(id []string) (map[string]string, error) {
 	}
 	defer snmp.Close()
 
-	oids, err := snmpgo.NewOids(id)
+	oids, err := snmpgo.NewOids(ids)
 
 	//GetData :
 	pdu, err := snmp.GetRequest(oids)
@@ -94,7 +100,7 @@ func (s snmpConn) GetMany(id []string) (map[string]string, error) {
 	pdu.VarBinds().MatchOid(oids[0]).Variable.String()
 	resmap := make(map[string]string)
 
-	for i, k := range id {
+	for i, k := range ids {
 		resmap[k] = pdu.VarBinds().MatchOid(oids[i]).Variable.String()
 		i++
 	}
