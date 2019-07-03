@@ -212,7 +212,7 @@ func (q documentQuery) Select(selector interface{}) gear.DocQuery {
 	return q
 }
 
-func (q documentQuery) Sort(fields ...string) geary.DocQuery {
+func (q documentQuery) Sort(fields ...string) gear.DocQuery {
 	q.query.Sort(fields...)
 
 	return q
