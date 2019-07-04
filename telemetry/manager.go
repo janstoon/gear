@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Devices map[string]device
@@ -13,8 +14,12 @@ type Devices map[string]device
 type device struct {
 	DevName     string
 	Protocol    string
-	ProtocolOpt string
+	ProtocolOpt ProtocolOptType
 	Oids        []string
+}
+
+type ProtocolOptType struct {
+	Username, Password, Community, Ip, Version string
 }
 
 // Construct a new device :
@@ -24,7 +29,7 @@ type device struct {
 // protocolOpt >> rtu = ...
 // protocolOpt >> ... = ...
 
-func (tm Devices) AddDevice(devName, protocol, protocolOpt string) device {
+func (tm Devices) AddDevice(devName, protocol string, protocolOpt ProtocolOptType) device {
 	dev := device{}
 	dev.DevName = devName
 	dev.Protocol = protocol
@@ -58,51 +63,53 @@ func (tm Devices) Subscribe(topic string) (<-chan gear.Message, error) {
 	devName := topicSplited[0]
 	devOid := topicSplited[1]
 
-	/* The interval creation , it is correct but commented because has not been completely coded.
+	// The interval creation , it is correct but commented because has not been completely coded.
 	var devInterval int
-
 	if len(topicSplited) > 2 {
 		devInterval, _ = strconv.Atoi(topicSplited[2])
 	} else {
 		devInterval = 1
 	}
-	*/
 
 	var result string
 	var err error
 
-	//tick := time.NewTicker(time.Second * time.Duration(devInterval))
-	//go func() {
-	//	for {
-	//		select {
-	//		case <- tick.C:
-	for i, a := range tm {
-		if i == devName {
-			for _, o := range a.Oids {
-				if o == devOid {
-					result, err = getData(a, o)
-				}
-			}
-		}
-	}
-	//		}
-	//	}
-	//}()
-
-	if err != nil {
-		return nil, err
-	}
-
 	msg := gear.Message{
 		Topic: topic,
-		Reply: nil,
+		Reply: "",
 		Data:  []byte(result),
 	}
 
 	msgRes := make(chan gear.Message)
 
-	msgRes <- msg
-	close(msgRes)
+	for i, a := range tm {
+		if i == devName {
+			conn := makeConnection(a)
+			for _, o := range a.Oids {
+				if o == devOid {
+					//tick
+					tick := time.NewTicker(time.Duration(devInterval) * time.Second)
+					go func() {
+						for {
+							select {
+							case <-tick.C:
+								fmt.Print("tick")
+								result, err = conn.Get(o)
+								msg.Data = []byte(result)
+								msgRes <- msg
+								fmt.Printf(" @ %v : %s\n", time.Duration(devInterval), result)
+							}
+						}
+					}()
+				}
+			}
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
 	return msgRes, err
 }
 
@@ -112,19 +119,15 @@ func (tm Devices) Unsubscribe(topic string) error {
 }
 
 // Create a connection to use the desired protocol.
-// Now only supported snmp for one oid!
-func getData(device device, oid string) (string, error) { //func makeConnection(device device) ([]string, error)
+// Now only support snmp protocol
+func makeConnection(device device) Connection {
 
-	var result string
-	var err error
+	var connection Connection
 
-	protocolOpts := strings.Split(device.ProtocolOpt, "/")
-	fmt.Println(device.Oids)
+	// Make Connection for SNMP :
 	if device.Protocol == "snmp" {
-		version, _ := strconv.Atoi(protocolOpts[4])
-		connection := DialSNMP(protocolOpts[0], protocolOpts[1], protocolOpts[2], protocolOpts[3], version)
-		result, err = connection.Get(oid)
+		version, _ := strconv.Atoi(device.ProtocolOpt.Version)
+		connection = DialSNMP(device.ProtocolOpt.Username, device.ProtocolOpt.Password, device.ProtocolOpt.Community, device.ProtocolOpt.Ip, version)
 	}
-
-	return result, err
+	return connection
 }
