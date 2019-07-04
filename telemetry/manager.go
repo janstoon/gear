@@ -17,10 +17,7 @@ type device struct {
 	Oids        []string
 }
 
-//To keep Devices in Memory
-//var tempDevice []device
-
-//Construct a new device :
+// Construct a new device :
 // devName = Device Name eg. dev1
 // protocol = snmp , rtu , ...
 // protocolOpt >> snmp = username/password/community/ip:port/version
@@ -36,7 +33,7 @@ func (tm Devices) AddDevice(devName, protocol, protocolOpt string) device {
 	return dev
 }
 
-//Set Which Parameter of the device needs to read/write
+// Register Which Parameter of the device needs to read/write
 func (tm Devices) RegisterDeviceParams(devName string, oids []string) {
 	for i, a := range tm {
 		if devName == i {
@@ -46,7 +43,8 @@ func (tm Devices) RegisterDeviceParams(devName string, oids []string) {
 	}
 }
 
-//Create a Subscription upon on the name of topic : <device name>/<optional description>
+// Create a Subscription upon on the name of topic : <device name>/<oid>/<optional interval in seconds>
+// e.g : dev1/1.2.1.4.5.1.2/100 or testdev/1.2.1.4.2.1
 func (tm Devices) Subscribe(topic string) (<-chan gear.Message, error) {
 
 	pattern := `^\w+\/[1]\.(\w|\.)+\/?\d*$`
@@ -60,13 +58,15 @@ func (tm Devices) Subscribe(topic string) (<-chan gear.Message, error) {
 	devName := topicSplited[0]
 	devOid := topicSplited[1]
 
-	//var devInterval int
-	//
-	//if len(topicSplited) > 2 {
-	//	devInterval, _ = strconv.Atoi(topicSplited[2])
-	//} else {
-	//	devInterval = 1
-	//}
+	/* The interval creation , it is correct but commented because has not been completely coded.
+	var devInterval int
+
+	if len(topicSplited) > 2 {
+		devInterval, _ = strconv.Atoi(topicSplited[2])
+	} else {
+		devInterval = 1
+	}
+	*/
 
 	var result string
 	var err error
