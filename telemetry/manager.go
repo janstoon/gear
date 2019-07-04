@@ -89,6 +89,7 @@ func (tm Devices) Subscribe(topic string) (<-chan gear.Message, error) {
 				if o == devOid {
 					//tick
 					tick := time.NewTicker(time.Duration(devInterval) * time.Second)
+					tickClose := make(chan struct{})
 					go func() {
 						for {
 							select {
@@ -98,6 +99,9 @@ func (tm Devices) Subscribe(topic string) (<-chan gear.Message, error) {
 								msg.Data = []byte(result)
 								msgRes <- msg
 								fmt.Printf(" @ %v : %s\n", time.Duration(devInterval), result)
+							case <-tickClose:
+								tick.Stop()
+								return
 							}
 						}
 					}()
