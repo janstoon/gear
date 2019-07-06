@@ -52,7 +52,7 @@ func (tm Devices) RegisterDeviceParams(devName string, oids []string) {
 // e.g : dev1/1.2.1.4.5.1.2/100 or testdev/1.2.1.4.2.1
 func (tm Devices) Subscribe(topic string) (<-chan gear.Message, error) {
 
-	pattern := `^\w+\/[1]\.(\w|\.)+\/?\d*$`
+	pattern := `^\w+\/[1]\.(\w|\.)+\??\d*$`
 	validation, _ := regexp.MatchString(pattern, topic)
 	if validation == false {
 		err := fmt.Errorf("please check your topic: %s again", topic)
@@ -61,15 +61,21 @@ func (tm Devices) Subscribe(topic string) (<-chan gear.Message, error) {
 
 	topicSplited := strings.Split(topic, "/")
 	devName := topicSplited[0]
-	devOid := topicSplited[1]
+	devParams := strings.Split(topicSplited[1],"?")
+	devOid := devParams[0]
+
 
 	// The interval creation , it is correct but commented because has not been completely coded.
 	var devInterval int
-	if len(topicSplited) > 2 {
-		devInterval, _ = strconv.Atoi(topicSplited[2])
+	if len(devParams) > 1 {
+		devInterval, _ = strconv.Atoi(devParams[1])
+		if devInterval == 0 {
+			devInterval = 1
+		}
 	} else {
 		devInterval = 1
 	}
+
 
 	var result string
 	var err error
@@ -86,25 +92,32 @@ func (tm Devices) Subscribe(topic string) (<-chan gear.Message, error) {
 		if i == devName {
 			conn := makeConnection(a)
 			for _, o := range a.Oids {
-				if o == devOid {
+				fmt.Printf("%s , %s , %d , @ %s\n", devParams , devOid , devInterval , o)
+				if devOid == o {
+					fmt.Println("matched")
 					//tick
+					fmt.Println(time.Duration(devInterval) * time.Second)
 					tick := time.NewTicker(time.Duration(devInterval) * time.Second)
 					tickClose := make(chan struct{})
 					go func() {
 						for {
 							select {
 							case <-tick.C:
-								fmt.Print("tick")
+								fmt.Println("tick")
 								result, err = conn.Get(o)
 								msg.Data = []byte(result)
 								msgRes <- msg
-								fmt.Printf(" @ %v : %s\n", time.Duration(devInterval), result)
+								fmt.Printf(" result: %s\n", result)
 							case <-tickClose:
 								tick.Stop()
 								return
 							}
 						}
 					}()
+				break
+				} else {
+					fmt.Println("not matched!")
+					return nil , fmt.Errorf("Your desired OID has not been registered: %s" , devOid)
 				}
 			}
 		}
