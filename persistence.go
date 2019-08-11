@@ -15,7 +15,7 @@ type Dictionary interface {
 	GetDefault(key string, value interface{}) interface{}
 }
 
-type RelationalSqlDatabase interface {
+type Sql interface {
 	Begin() (*sql.Tx, error)
 	Exec(query string, args ...interface{}) (sql.Result, error)
 	Prepare(query string) (*sql.Stmt, error)
